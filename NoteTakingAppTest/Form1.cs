@@ -22,10 +22,10 @@ namespace NoteTakingAppTest
             notes = new DataTable();
             adapter.Fill(notes);
 
-            notes.Columns[0].ColumnName = "ID";
-            notes.Columns[1].ColumnName = "Title";
-            notes.Columns[2].ColumnName = "Content";
-            notes.Columns[3].ColumnName = "Date";
+            notes.Columns[0].Caption = "ID";
+            notes.Columns[1].Caption = "Title";
+            notes.Columns[2].Caption = "Content";
+            notes.Columns[3].Caption = "Date";
 
             /*
             notes = new DataTable();
@@ -36,7 +36,7 @@ namespace NoteTakingAppTest
 
             dataGridView1.DataSource = notes;
             dataGridView1.Columns["ID"].Visible = false;
-            dataGridView1.Columns["Content"].Visible = false;
+            dataGridView1.Columns["Data"].Visible = false;
             dataGridView1.Columns["Title"].Width = 160;
             dataGridView1.Columns["Date"].Width = 63;
 
@@ -84,11 +84,22 @@ namespace NoteTakingAppTest
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             int index = dataGridView1.CurrentCell.RowIndex;
+            
+            // int index = dataGridView1.CurrentCell.RowIndex;
 
             if (index > -1)
             {
-                textTitle.Text = notes.Rows[index].ItemArray[1].ToString();
-                textContent.Text = notes.Rows[index].ItemArray[2].ToString();
+                DataRowView rowView = dataGridView1.Rows[index].DataBoundItem as DataRowView;
+                DataRow row = rowView.Row as DataRow;
+                int noteIndex = Convert.ToInt32(row[0]);
+                textTitle.Text = row[1].ToString();
+                textContent.Text = row[2].ToString();
+
+                /*
+                textTitle.Text = notes.Rows[noteIndex].ItemArray[1].ToString();
+                textContent.Text = notes.Rows[noteIndex].ItemArray[2].ToString();
+                */
+
                 textTitle.Enabled = false;
                 textContent.Enabled = false;
             }
@@ -98,12 +109,17 @@ namespace NoteTakingAppTest
         {
             int index = dataGridView1.CurrentCell.RowIndex;
 
+            DataRowView rowView = dataGridView1.Rows[index].DataBoundItem as DataRowView;
+            DataRow row = rowView.Row as DataRow;
+            int noteIndex = Convert.ToInt32(row[0]);
+
             String connectionString = "Data Source=DESKTOP-464DU9K;Initial Catalog=POO;Integrated Security=True";
             SqlConnection connection = new SqlConnection(connectionString);
             connection.Open();
 
             SqlCommand command = new SqlCommand("DELETE Notes WHERE ID=@ID", connection);
-            command.Parameters.AddWithValue("@ID", notes.Rows[index].ItemArray[0]);
+            // command.Parameters.AddWithValue("@ID", notes.Rows[index].ItemArray[0]);
+            command.Parameters.AddWithValue("@ID", noteIndex);
             command.ExecuteNonQuery();
 
             SqlDataAdapter adapter = new SqlDataAdapter("SELECT * FROM Notes", connection);
